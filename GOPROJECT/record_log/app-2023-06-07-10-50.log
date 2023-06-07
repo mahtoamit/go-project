@@ -1,0 +1,4 @@
+2023-06-07T10:50:13.420 INFO handler /api/v1/login  Login Login Succesfully. ResponseTime:1.6253ms
+2023-06-07T10:50:29.479 INFO book /api/v1/books saket@gmail.com Getbooks started ResponseTime:0s
+2023-06-07T10:50:29.492 INFO book /api/v1/books saket@gmail.com Getbooks ended ResponseTime:12.7697ms
+2023-06-07T10:50:43.867 INFO Main   main Graceful shutdown ResponseTime:48.4976858s
