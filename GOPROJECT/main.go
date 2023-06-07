@@ -15,7 +15,7 @@ import (
 	"github.com/tutorialedge/go-fiber-tutorial/health"
 	"github.com/tutorialedge/go-fiber-tutorial/models"
 	"github.com/tutorialedge/go-fiber-tutorial/utils"
-	"github.com/tutorialedge/go-fiber-tutorial/configs"
+	"github.com/tutorialedge/go-fiber-tutorial/constants"
 )
 
 
@@ -34,10 +34,10 @@ func SetupRoutes(app *fiber.App) {
 	app.Post("/api/v1/logout", handler.Logout)
 	app.Get("/api/v1/health-check", health.Connect)
 	app.Get("/api/v1/book", auth.Protected(), book.Getbooks)
-	app.Get(configs.Url_book, auth.Protected(), book.Getbook)
+	app.Get(constants.Url_book, auth.Protected(), book.Getbook)
 	app.Post("/api/v1/book/", auth.Protected(), book.Newbook(bookDataChannel))
-	app.Put(configs.Url_book, auth.Protected(), book.UpdateBook(bookDataChannel))
-	app.Delete(configs.Url_book, auth.Protected(), book.Deletebook(bookDataChannel))
+	app.Put(constants.Url_book, auth.Protected(), book.UpdateBook(bookDataChannel))
+	app.Delete(constants.Url_book, auth.Protected(), book.Deletebook(bookDataChannel))
 }
 
 func main() {

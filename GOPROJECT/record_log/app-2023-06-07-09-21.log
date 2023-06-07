@@ -1,3 +1,0 @@
-2023-06-07T09:21:02.438 INFO book /api/v1/book/:title saket@gmail.com Deletebook started ResponseTime:0s
-2023-06-07T09:21:02.493 INFO book /api/v1/book/:title saket@gmail.com Deletebook ended ResponseTime:55.8282ms
-2023-06-07T09:21:27.268 INFO Main   main Graceful shutdown ResponseTime:1m26.6331619s
