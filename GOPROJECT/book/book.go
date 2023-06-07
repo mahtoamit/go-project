@@ -54,7 +54,8 @@ func Getbooks( c *fiber.Ctx) error {
 		if err := json.Unmarshal([]byte(cachedData), &books); err != nil {
 			utils.Log("ERROR", "book", constants.Url_get_books,userId, "Getbooks", constants.Unmarshal_error +err.Error(), startTime, time.Now())
 		}
-		utils.Log("INFO", "book", constants.Url_get_books,userId, "Getbooks", "ended", startTime, time.Now())
+		endTime := time.Now()
+		utils.Log("INFO", "book", constants.Url_get_books,userId, "Getbooks", "ended", startTime,endTime)
 		return c.JSON(fiber.Map{"data":books})
 	}
 
@@ -73,16 +74,17 @@ func Getbooks( c *fiber.Ctx) error {
 			utils.Log("ERROR", "book", constants.Url_get_books, userId,"Getbooks", constants.Error_caching_data + err.Error(), startTime, time.Now())
 		}
 	}
-	utils.Log("INFO", "book", constants.Url_get_books,userId, "Getbooks", "ended",startTime, time.Now())
+	endTime := time.Now()
+	utils.Log("INFO", "book", constants.Url_get_books,userId, "Getbooks", "ended",startTime, endTime)
 	return c.JSON(fiber.Map{"data":books})
 
 }
 
 func Getbook( c *fiber.Ctx) error {
 	utils.InitLogger()
-	
+	startTime = time.Now()
 	userId := c.Locals("userId").(string)
-	utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Getbook", "started",time.Now(), time.Now())
+	utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Getbook", "started",startTime, time.Now())
 	// Check if the data exists in the Redis cache
 	redisClient := database.RedisClient
 	cachedData, err := redisClient.Get(ctx, "title").Result()
@@ -92,7 +94,8 @@ func Getbook( c *fiber.Ctx) error {
 		if err := json.Unmarshal([]byte(cachedData), &books); err != nil {
 			utils.Log("ERROR", "book", constants.Url_get_single_book,userId, "Getbook", constants.Unmarshal_error + err.Error(),startTime, time.Now())
 		}
-		utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Getbook", "ended",time.Now(), time.Now())
+		endTime := time.Now()
+		utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Getbook", "ended",startTime, endTime)
 		return c.JSON(fiber.Map{"data":books})
 	}
 
@@ -104,7 +107,8 @@ func Getbook( c *fiber.Ctx) error {
 	fmt.Println("data:",books.Title)
 
 	if books.Title == "" {
-		utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Getbook", "ended",time.Now(), time.Now())
+		endTime := time.Now()
+		utils.Log("ERROR", "book", constants.Url_get_single_book,userId, "Getbook", "ended",startTime, endTime)
 		return c.Status(253).JSON("No book found for  this title")
 	}
 
@@ -119,7 +123,8 @@ func Getbook( c *fiber.Ctx) error {
 			utils.Log("ERROR", "book", constants.Url_get_single_book,userId, "Getbooks", constants.Error_caching_data + err.Error(),startTime, time.Now())
 		}
 	}
-	utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Getbook", "ended",time.Now(), time.Now())
+	endTime := time.Now()
+	utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Getbook", "ended",startTime, endTime)
 	return c.JSON(fiber.Map{"data":books})
 
 }
@@ -145,7 +150,7 @@ func Newbook(dataChannel chan models.Book,) func(*fiber.Ctx) error {
 	}
 	//use the validator library to validate required fields
 	if validationErr := validate.Struct(books); validationErr != nil {
-		utils.Log("ERROR", "book", constants.Url_add_book, userId,"Deletebook", validationErr.Error(),startTime, time.Now())
+		utils.Log("ERROR", "book", constants.Url_add_book, userId,"NewBook", validationErr.Error(),startTime, time.Now())
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": validationErr.Error()})
 
 	}
@@ -178,7 +183,8 @@ func Newbook(dataChannel chan models.Book,) func(*fiber.Ctx) error {
 		if err := json.Unmarshal([]byte(cachedData),books); err != nil {
 			utils.Log("ERROR", "book", constants.Url_add_book,userId, "Newbook", constants.Unmarshal_error + err.Error(), startTime, time.Now())
 		}
-		utils.Log("INFO", "book", constants.Url_add_book,userId, "Newbook", "ended", startTime, time.Now())
+		endTime := time.Now() 
+		utils.Log("INFO", "book", constants.Url_add_book,userId, "Newbook", "ended", startTime, endTime)
 		
 		
 		//push the data to the channel to entry in the db
@@ -212,7 +218,7 @@ func Deletebook(dataChannel chan models.Book) func( *fiber.Ctx) error {
 
 	if books.Title == "" {
 		endTime := time.Now()
-		utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Deletebook", "ended",startTime, endTime)
+		utils.Log("ERROR", "book", constants.Url_get_single_book,userId, "Deletebook", "ended",startTime, endTime)
 		return c.Status(253).JSON("No book found ")
 	}
 	db.Where("title", title).Delete(&books)
@@ -243,7 +249,7 @@ func UpdateBook(dataChannel chan models.Book) func( *fiber.Ctx) error {
 	db.Where("title= ?", title).Find(&book)
 	if book.ID == 0 {
 		endTime := time.Now()
-		utils.Log("INFO", "book", constants.Url_get_single_book,userId, "UpdateBook", "ended", startTime, endTime)
+		utils.Log("ERROR", "book", constants.Url_get_single_book,userId, "UpdateBook", "ended", startTime, endTime)
 		return c.Status(253).JSON("No book found ")
 	}
 

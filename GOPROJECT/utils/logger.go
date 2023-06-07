@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
+	"github.com/tutorialedge/go-fiber-tutorial/constants"
 )
 
 var Logger *log.Logger
@@ -16,7 +17,7 @@ var lastLogEntryTime time.Time
 
 func InitLogger() {
 	once.Do(func() {
-		logFile, err := os.OpenFile("record_log/app.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		logFile, err := os.OpenFile(constants.Filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
 			fmt.Println("Error creating log file:", err)
 			return
@@ -33,7 +34,7 @@ func InitLogger() {
 // Log logs the message with the specified log level, API name, endpoint, function name, user's id, and message.
 func Log(level, apiName, endpoint, funcName, userId, message string, times ...time.Time) {
 	timestamp := time.Now().Format("2006-01-02T15:04:05.000")
-	fileName := "app-" + time.Now().Format("2006-01-02-15-04") + ".log"
+	fileName := constants.Filename_start + time.Now().Format("2006-01-02-15-04") + constants.Filename_ext
 	logFilePath := filepath.Join("record_log", fileName)
 
 	rotateLogFile(logFilePath)

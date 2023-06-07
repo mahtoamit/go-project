@@ -13,4 +13,8 @@ const (
 	Url_logout = "/api/v1/logout"
 	Url_book = "/api/v1/book/:title"
 	Redis_book_const = "books:%s"
+    Filename = "record_log/app.log"
+	Filename_start = "app-"
+	Filename_ext = ".log"
+
 )
