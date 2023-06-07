@@ -1,0 +1,6 @@
+2023-06-07T09:20:00.635 INFO Main   main Application starting ResponseTime:0s
+2023-06-07T09:20:00.634 INFO book /api/v1/book/ dequequedata  started ResponseTime:0s
+2023-06-07T09:20:00.713 INFO database redis  Connect Connection opened to the Redis server ResponseTime:8.5303ms
+2023-06-07T09:20:00.723 INFO Main   main Database initialized ResponseTime:88.412ms
+2023-06-07T09:20:19.179 INFO book /api/v1/books saket@gmail.com Getbooks started ResponseTime:0s
+2023-06-07T09:20:19.181 INFO book /api/v1/books saket@gmail.com Getbooks ended ResponseTime:2.019ms
