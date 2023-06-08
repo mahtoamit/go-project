@@ -15,6 +15,7 @@ import (
 	"github.com/tutorialedge/go-fiber-tutorial/models"
 	"github.com/tutorialedge/go-fiber-tutorial/utils"
 	"github.com/tutorialedge/go-fiber-tutorial/constants"
+	"github.com/tutorialedge/go-fiber-tutorial/queries"
 )
 
 // const (
@@ -46,37 +47,28 @@ func Getbooks( c *fiber.Ctx) error {
 	startTime := time.Now() // Set the start time before processing the request
 	utils.Log("INFO", "book", constants.Url_get_books,userId, "Getbooks", "started", startTime, time.Now())
 	// Check if the data exists in the Redis cache
-	redisClient := database.RedisClient
-	cachedData, err := redisClient.Get(ctx, "books").Result()
-	if err == nil {
-		// Data exists in the cache, retrieve and return it
-		var books []models.Book
-		if err := json.Unmarshal([]byte(cachedData), &books); err != nil {
-			utils.Log("ERROR", "book", constants.Url_get_books,userId, "Getbooks", constants.Unmarshal_error +err.Error(), startTime, time.Now())
-		}
+	
+	key := "books"
+	data:= queries.RedisCache(key,userId)
+	
+	if data != nil {
 		endTime := time.Now()
-		utils.Log("INFO", "book", constants.Url_get_books,userId, "Getbooks", "ended", startTime,endTime)
-		return c.JSON(fiber.Map{"data":books})
+	    utils.Log("INFO", "book", constants.Url_get_books,userId, "Getbooks", "ended", startTime,endTime)
+        return c.Status(200).JSON(fiber.Map{"data":data})
 	}
-
+	
 	// Data does not exist in the cache, fetch from the database
-	db := database.Database
-	var books []models.Book
-	db.Find(&books)
+	books := queries.DBGetBooks()
 
-	// Store the data in the Redis cache for future use
-	data, err := json.Marshal(books)
-	if err != nil {
-		utils.Log("ERROR", "book", constants.Url_get_books,userId, "Getbooks", constants.Unmarshal_error + err.Error(), startTime, time.Now())
-	} else {
-		err := redisClient.Set(ctx, "books", data, 1*time.Hour).Err()
-		if err != nil {
-			utils.Log("ERROR", "book", constants.Url_get_books, userId,"Getbooks", constants.Error_caching_data + err.Error(), startTime, time.Now())
-		}
+	result , err := queries.RedisSetCache(books ,key,userId)
+	
+    if err !=nil && !result {
+		utils.Log("DEBUG", "book", constants.Url_get_books,userId, "Getbooks", "ended")
+		return c.Status(252).JSON(fiber.Map{"msg":err} )
 	}
 	endTime := time.Now()
-	utils.Log("INFO", "book", constants.Url_get_books,userId, "Getbooks", "ended",startTime, endTime)
-	return c.JSON(fiber.Map{"data":books})
+    utils.Log("INFO", "book", constants.Url_get_books,userId, "Getbooks", "ended",startTime, endTime)
+	return c.Status(200).JSON(fiber.Map{"data":&books})
 
 }
 
@@ -85,26 +77,22 @@ func Getbook( c *fiber.Ctx) error {
 	startTime = time.Now()
 	userId := c.Locals("userId").(string)
 	utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Getbook", "started",startTime, time.Now())
+	name := c.Params("title")
 	// Check if the data exists in the Redis cache
-	redisClient := database.RedisClient
-	cachedData, err := redisClient.Get(ctx, "title").Result()
-	if err == nil {
-		// Data exists in the cache, retrieve and return it
-		var books []models.Book
-		if err := json.Unmarshal([]byte(cachedData), &books); err != nil {
-			utils.Log("ERROR", "book", constants.Url_get_single_book,userId, "Getbook", constants.Unmarshal_error + err.Error(),startTime, time.Now())
-		}
+	titlekey := fmt.Sprintf(constants.Redis_book_const, name)
+	data:= queries.RedisCacheGetBook(titlekey,userId)
+	
+	if data != nil {
+		
 		endTime := time.Now()
-		utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Getbook", "ended",startTime, endTime)
-		return c.JSON(fiber.Map{"data":books})
+	    utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Getbooks", "ended", startTime,endTime)
+        return c.Status(200).JSON(fiber.Map{"data":data})
 	}
+    
 
 	// Data does not exist in the cache, fetch from the database
-	db := database.Database
-	name := c.Params("title")
-	var books models.Book
-	db.Where("title", name).Find(&books)
-	fmt.Println("data:",books.Title)
+	books := queries.DBGetSingleBook(name)
+	
 
 	if books.Title == "" {
 		endTime := time.Now()
@@ -112,31 +100,28 @@ func Getbook( c *fiber.Ctx) error {
 		return c.Status(253).JSON("No book found for  this title")
 	}
 
-
-	// Store the data in the Redis cache for future use
-	data, err := json.Marshal(books)
-	if err != nil {
-		utils.Log("ERROR", "book", constants.Url_get_single_book,userId,"Getbooks", "Error marshaling books data:"+err.Error(),startTime, time.Now())
-	} else {
-		err := redisClient.Set(ctx, fmt.Sprintf(constants.Redis_book_const, name), data, 1*time.Hour).Err()
-		if err != nil {
-			utils.Log("ERROR", "book", constants.Url_get_single_book,userId, "Getbooks", constants.Error_caching_data + err.Error(),startTime, time.Now())
-		}
+    
+	result ,err := queries.RedisSetCacheBook(books ,titlekey,userId)
+	
+    if err !=nil && !result {
+		utils.Log("DEBUG", "book", constants.Url_get_single_book,userId, "Getbook", "ended")
+		return c.Status(252).JSON(fiber.Map{"msg":err})
 	}
+
+
 	endTime := time.Now()
-	utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Getbook", "ended",startTime, endTime)
-	return c.JSON(fiber.Map{"data":books})
+    utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Getbook", "ended",startTime, endTime)
+	return c.Status(200).JSON(fiber.Map{"data":&books})
 
 }
 
-func Newbook(dataChannel chan models.Book,) func(*fiber.Ctx) error {
-	return func(c *fiber.Ctx) error {
+func Newbook(c *fiber.Ctx) error {
+	
 	utils.InitLogger()
 	userId := c.Locals("userId").(string)
 	
 	// Set the start time before processing the request
 	startTime := time.Now()
-
 	utils.Log("INFO", "book", constants.Url_add_book,userId, "Newbook", "started", startTime, time.Now())
 	var validate = validator.New()
 	redisClient := database.RedisClient
@@ -183,6 +168,8 @@ func Newbook(dataChannel chan models.Book,) func(*fiber.Ctx) error {
 		if err := json.Unmarshal([]byte(cachedData),books); err != nil {
 			utils.Log("ERROR", "book", constants.Url_add_book,userId, "Newbook", constants.Unmarshal_error + err.Error(), startTime, time.Now())
 		}
+
+		time.Sleep(5 *time.Second)
 		endTime := time.Now() 
 		utils.Log("INFO", "book", constants.Url_add_book,userId, "Newbook", "ended", startTime, endTime)
 		
@@ -200,11 +187,11 @@ func Newbook(dataChannel chan models.Book,) func(*fiber.Ctx) error {
 	return c.JSON(fiber.Map{"data":books})
 }
 
-}
 
-func Deletebook(dataChannel chan models.Book) func( *fiber.Ctx) error {
+
+func Deletebook(c *fiber.Ctx) error {
 	
-	return func(c *fiber.Ctx) error {
+	
 	utils.InitLogger()
     userId := c.Locals("userId").(string)
 	// Set the start time before processing the request
@@ -233,10 +220,10 @@ func Deletebook(dataChannel chan models.Book) func( *fiber.Ctx) error {
 	utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Deletebook", "ended",startTime, endTime)
 	return c.JSON("book is deleted succesfully.")
 
-}}
+}
 
-func UpdateBook(dataChannel chan models.Book) func( *fiber.Ctx) error {
-	return func(c *fiber.Ctx) error{
+func UpdateBook(c *fiber.Ctx) error {
+	
 	utils.InitLogger()
 	userId := c.Locals("userId").(string)
 	// Set the start time before processing the request
@@ -271,7 +258,7 @@ func UpdateBook(dataChannel chan models.Book) func( *fiber.Ctx) error {
 	utils.Log("INFO", "book", constants.Url_update_book,userId, "Updatebook", "ended", startTime, endTime)
 
 	return c.JSON(book)
-}}
+}
 
 func dequeueEmployeeData() {
 	utils.InitLogger()
