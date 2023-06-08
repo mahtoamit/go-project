@@ -85,3 +85,53 @@ func RedisCacheGetBook(userId string,key string)(books[]models.Book ){
 	}
 	return books
 }
+
+
+func RedisSetNewCache(books *models.Book,key string ,userId string)(flag1 bool,err error){
+	// Store the data in the Redis cache for future use
+	data, err := json.Marshal(books)
+	var redisClient = database.RedisClient
+	flag1 = false
+	if err != nil {
+		utils.Log("ERROR", "book", constants.Url_get_books,userId, "Getbooks", constants.Unmarshal_error + err.Error())
+		return flag1 ,err
+	} else {
+		err := redisClient.Set(ctx, key , data, 1*time.Hour).Err()
+		if err != nil {
+			utils.Log("ERROR", "book", constants.Url_get_books, userId,"Getbooks", constants.Error_caching_data + err.Error())
+			return flag1 ,err
+		}
+	}
+	flag1 =true
+	return flag1, err
+
+}
+
+func RedisDeleteBook(key string , userId string)(flag bool){
+	var redisClient = database.RedisClient
+	flag = false
+	del := redisClient.Del(ctx, key ).Err()
+	if del!= nil {
+		return false  
+
+	}
+    return true
+}
+
+
+func RedisNewCache(key string,userId string)(books models.Book ){
+	// Check if the data exists in the Redis cache
+	var redisClient = database.RedisClient
+	cachedData, err := redisClient.Get(ctx, key).Result()
+	
+	if err == nil {
+		// Data exists in the cache, retrieve and return it
+		
+		if err := json.Unmarshal([]byte(cachedData), &books); err != nil {
+			utils.Log("ERROR", "book", constants.Url_add_book,userId, "NewBook", constants.Unmarshal_error +err.Error())
+		}
+		
+		
+	}
+	return books
+}

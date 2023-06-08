@@ -3,7 +3,7 @@ package book
 
 import (
 	"context"
-	"encoding/json"
+	
 	"fmt"
 	"net/http"
 	"time"
@@ -124,7 +124,7 @@ func Newbook(c *fiber.Ctx) error {
 	startTime := time.Now()
 	utils.Log("INFO", "book", constants.Url_add_book,userId, "Newbook", "started", startTime, time.Now())
 	var validate = validator.New()
-	redisClient := database.RedisClient
+	
 	books := new(models.Book)
 	//validate the request body
 	if err := c.BodyParser(books); err != nil {
@@ -140,47 +140,38 @@ func Newbook(c *fiber.Ctx) error {
 
 	}
     //to first store the data in the redis
-	data, err := json.Marshal(books)
-	if err != nil {
-		utils.Log("ERROR", "book", constants.Url_get_books,userId, "Newbook", "Error marshaling books data:"+err.Error(), startTime, time.Now())
-	} else {
-		err := redisClient.Set(ctx, "data", data, 1*time.Hour).Err()
-		if err != nil {
-			utils.Log("ERROR", "book", constants.Url_get_books,userId, "Newbook", constants.Error_caching_data + err.Error(), startTime, time.Now())
-		}
+	key := "data"
+	data, err := queries.RedisSetNewCache(books,key,userId)
+
+	if err != nil && !data {
+		utils.Log("DEBUG", "book", constants.Url_add_book,userId, "NewBook", "ended")
+		return c.Status(252).JSON(fiber.Map{"msg":err})
 	}
 
 	// Invalidate the books cache in Redis
-	
-	del := redisClient.Del(ctx, "books").Err()
-	if del!= nil {
-		utils.Log("ERROR", "book", constants.Url_add_book ,userId, "Newbook", constants.Error_deleting_cached_data + err.Error(), startTime, time.Now())
+	deletekey := "books"
+    delete := queries.RedisDeleteBook(deletekey,userId)
+
+	if !delete {
+		utils.Log("DEBUG", "book", constants.Url_add_book,userId, "NewBook", "ended")
+		return c.Status(253).JSON(fiber.Map{"msg":"cache not deleted"})
 	}
 
 	// Check if the data exists in the Redis cache
 	
-	cachedData, err := redisClient.Get(ctx, "data").Result()
-	fmt.Println("cacheddata",cachedData)
-	fmt.Println("err",err)
-	if err == nil {
-		// Data exists in the cache, retrieve and return it
-		
-		if err := json.Unmarshal([]byte(cachedData),books); err != nil {
-			utils.Log("ERROR", "book", constants.Url_add_book,userId, "Newbook", constants.Unmarshal_error + err.Error(), startTime, time.Now())
-		}
+	book:= queries.RedisNewCache(key,userId)
 
-		time.Sleep(5 *time.Second)
+	if book.Title != "" {
 		endTime := time.Now() 
 		utils.Log("INFO", "book", constants.Url_add_book,userId, "Newbook", "ended", startTime, endTime)
-		
-		
 		//push the data to the channel to entry in the db
-		bookDataChannel <- *books
-		return c.JSON(fiber.Map{"data":books})
-		
-	}
+		bookDataChannel <- book
+		return c.JSON(fiber.Map{"data":book})
 
-	bookDataChannel <- *books
+	}
+		
+		
+
 	
 	endTime := time.Now() 
 	utils.Log("INFO", "book", constants.Url_add_book,userId, "Newbook", "ended",startTime, endTime)
