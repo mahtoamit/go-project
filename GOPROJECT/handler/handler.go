@@ -3,12 +3,13 @@ package handler
 import (
 	"fmt"
 	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/tutorialedge/go-fiber-tutorial/auth"
-	"github.com/tutorialedge/go-fiber-tutorial/database"
-	"github.com/tutorialedge/go-fiber-tutorial/models"
-	"github.com/tutorialedge/go-fiber-tutorial/utils"
 	"github.com/tutorialedge/go-fiber-tutorial/constants"
+	"github.com/tutorialedge/go-fiber-tutorial/models"
+	"github.com/tutorialedge/go-fiber-tutorial/queries"
+	"github.com/tutorialedge/go-fiber-tutorial/utils"
 )
 
 
@@ -25,8 +26,8 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 	// In real world application, you should hash the password
-	user := models.SignupRequest{}
-	database.Database.Where("email = ? AND password = ?", request.Email, request.Password).First(&user)
+	user := queries.Login(request.Email,request.Password)
+	
 	if user.Email == "" {
 		utils.Log("ERROR", "handler", constants.Url_login,"", "Login", "Invalid login credentials in Login",startTime, time.Now())
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -66,9 +67,13 @@ func Signup(c *fiber.Ctx) error {
 		Location: request.Location,
 	}
 	fmt.Println("data", user)
-	database.Database.Create(&user)
+	err := queries.CreateUser(user)
+	if err!= nil{
+		utils.Log("ERROR", "handler",constants.Url_signup,"","Signup", err.Error())
+		return c.Status(253).JSON(fiber.Map{"msg":"User Not created"})
+	}
 	utils.Log("INFO", "handler", constants.Url_signup,"", "Signup", "User created successfully in Signup", startTime, time.Now())
-	return c.JSON(user)
+	return c.Status(200).JSON(fiber.Map{"data":user})
 }
 
 func Logout(c *fiber.Ctx) error {

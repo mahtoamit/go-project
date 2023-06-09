@@ -75,7 +75,7 @@ func RedisSetCacheBook(books models.Book,key string ,userId string)(flag bool,er
 
 func RedisCacheGetBook(userId string,key string)(books[]models.Book ){
 	redisClient := database.RedisClient
-	cachedData, err := redisClient.Get(ctx, key ).Result()
+	cachedData, err := redisClient.Get(ctx,key).Result()
 	if err == nil {
 		// Data exists in the cache, retrieve and return it
 		var books []models.Book
@@ -134,4 +134,15 @@ func RedisNewCache(key string,userId string)(books models.Book ){
 		
 	}
 	return books
+}
+
+
+func Deletebook(data string,userId string)(err error){
+	// Invalidate the employees cache in Redis
+	redisClient := database.RedisClient
+	err = redisClient.Del(ctx, "books",data).Err()
+	if err != nil {
+		return err
+	}
+	return nil
 }

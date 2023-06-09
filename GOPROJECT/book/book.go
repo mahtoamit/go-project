@@ -2,7 +2,7 @@ package book
 
 
 import (
-	"context"
+	
 	
 	"fmt"
 	"net/http"
@@ -11,7 +11,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	
-	"github.com/tutorialedge/go-fiber-tutorial/database"
+	
 	"github.com/tutorialedge/go-fiber-tutorial/models"
 	"github.com/tutorialedge/go-fiber-tutorial/utils"
 	"github.com/tutorialedge/go-fiber-tutorial/constants"
@@ -28,7 +28,7 @@ import (
 // 	Error_deleting_cached_data = "Error deleting employees cache: "
 // )
 
-var ctx = context.Background()
+
 
 
 var bookDataChannel chan models.Book
@@ -189,27 +189,33 @@ func Deletebook(c *fiber.Ctx) error {
 	startTime := time.Now()
 
 	utils.Log("INFO", "book", constants.Url_get_single_book, userId,"Deletebook", "started",startTime, time.Now())
-	db := database.Database
+	
 	title := c.Params("title")
-	var books models.Book
-	db.Where("title= ?", title).Find(&books)
+	
+	books := queries.DBGetSingleBook(title)
 
 	if books.Title == "" {
 		endTime := time.Now()
 		utils.Log("ERROR", "book", constants.Url_get_single_book,userId, "Deletebook", "ended",startTime, endTime)
 		return c.Status(253).JSON("No book found ")
 	}
-	db.Where("title", title).Delete(&books)
 
-	// Invalidate the employees cache in Redis
-	redisClient := database.RedisClient
-	err := redisClient.Del(ctx, "books",fmt.Sprintf(constants.Redis_book_const, title)).Err()
-	if err != nil {
-		utils.Log("ERROR", "book", constants.Url_get_single_book,userId,"Deletebook", constants.Error_deleting_cached_data + err.Error(),startTime, time.Now())
+
+	queries.DBDeletetBook(title,books)
+	
+
+    data := fmt.Sprintf(constants.Redis_book_const, title)
+
+	err := queries.Deletebook(data,userId)
+
+	if err !=nil{
+		utils.Log("ERROR", "book", constants.Url_get_single_book,userId,"Deletebook", constants.Error_deleting_cached_data + err.Error())
+		return c.Status(252).JSON(fiber.Map{"msg":err})
 	}
+	
 	endTime := time.Now() // Get the end time after processing the request
 	utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Deletebook", "ended",startTime, endTime)
-	return c.JSON("book is deleted succesfully.")
+	return c.Status(200).JSON(fiber.Map{"msg":"book is deleted succesfully."})
 
 }
 
@@ -222,10 +228,10 @@ func UpdateBook(c *fiber.Ctx) error {
 
 	title := c.Params("title")
 	utils.Log("INFO", "book", constants.Url_get_single_book,userId, "Updatebook", "started",startTime, time.Now())
-	db := database.Database
+	
 	book := new(models.Book)
-	db.Where("title= ?", title).Find(&book)
-	if book.ID == 0 {
+	books := queries.DBGetUpdateBook(title)
+	if books.ID == 0 {
 		endTime := time.Now()
 		utils.Log("ERROR", "book", constants.Url_get_single_book,userId, "UpdateBook", "ended", startTime, endTime)
 		return c.Status(253).JSON("No book found ")
@@ -237,18 +243,22 @@ func UpdateBook(c *fiber.Ctx) error {
 			"error": "Cannot parse JSON",
 		})
 	}
-	db.Save(&book)
+	
+	result := queries.DBUpdateBook(book)
 
-	// Invalidate the employees cache in Redis
-	redisClient := database.RedisClient
-	err := redisClient.Del(ctx, "books",fmt.Sprintf(constants.Redis_book_const, title)).Err()
-	if err != nil {
-		utils.Log("ERROR", "book", constants.Url_get_single_book, userId,"Deletebook", constants.Error_deleting_cached_data + err.Error(),startTime, time.Now())
+	data := fmt.Sprintf(constants.Redis_book_const, title)
+    
+	err := queries.Deletebook(data,userId)
+	
+	if err !=nil{
+		utils.Log("ERROR", "book", constants.Url_update_book,userId,"Updatebook", constants.Error_deleting_cached_data + err.Error())
+		return c.Status(252).JSON(fiber.Map{"msg":err})
 	}
+
     endTime := time.Now()
 	utils.Log("INFO", "book", constants.Url_update_book,userId, "Updatebook", "ended", startTime, endTime)
 
-	return c.JSON(book)
+	return c.Status(200).JSON(fiber.Map{"data":result})
 }
 
 func dequeueEmployeeData() {
@@ -261,8 +271,7 @@ func dequeueEmployeeData() {
 		// Calculate the response time
 		startTime := time.Now()
 
-		db  := database.Database
-	    err := db.Create(&book).Error
+		err := queries.DBCreate(book)
 		if err !=nil {
 			utils.Log("Error","book",constants.Url_add_book,"dequeuedata","",err.Error(),startTime, time.Now())
 		}
