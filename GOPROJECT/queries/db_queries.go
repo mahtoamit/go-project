@@ -1,6 +1,7 @@
 package queries
 
 import (
+	"time"
 	
 	"github.com/tutorialedge/go-fiber-tutorial/database"
 	"github.com/tutorialedge/go-fiber-tutorial/models"
@@ -34,10 +35,10 @@ func DBGetUpdateBook(title string)(books *models.Book){
 	return books
 }
 
-func DBUpdateBook(book *models.Book)(data *models.Book){
+func DBUpdateBook(title string,books *models.Book)(*models.Book){
 	db := database.Database
-	db.Save(&book)
-	return data
+	db.Exec("UPDATE books SET title = ?,author = ?,deleted_at =?,rating = ? Where title = ?",books.Title,books.Author,time.Now().Format("2006-01-02T15:04:05.000"),books.Rating,title)
+	return books
 }
 
 

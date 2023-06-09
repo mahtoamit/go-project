@@ -244,7 +244,7 @@ func UpdateBook(c *fiber.Ctx) error {
 		})
 	}
 	
-	result := queries.DBUpdateBook(book)
+	result := queries.DBUpdateBook(title,book)
 
 	data := fmt.Sprintf(constants.Redis_book_const, title)
     
