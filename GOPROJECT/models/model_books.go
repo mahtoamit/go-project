@@ -4,11 +4,14 @@ import (
 	"gorm.io/gorm"
 )
 
+
+
 type Book struct {
 	gorm.Model
 	Title    string `json:"title" validate:"required"`
 	Author   string `json:"author" validate:"required"`
 	Rating   int    `json:"rating" validate:"required"`
+	OtherInfo string `json:"otherinfo" validate:"required"`
 }
 
 type LoginRequest struct {
