@@ -30,7 +30,7 @@ func main() {
 	
 	app.Use(logger.New())
 
-	database.DBConnect()
+	database.Connect()
 	database.RedisConnect()
 
 	utils.Log("INFO", "Main", "","", "main", "Database initialized",startTime, time.Now())
@@ -52,7 +52,7 @@ func main() {
 		serverShutdown <- struct{}{}
 	   
 		// Close the database and Redis connections
-		database.CloseDatabase()
+		// database.CloseDatabase()
 		database.ReddisClose()
 
 		utils.Log("INFO", "Main", "","", "main", "Application has been stopped",startTime, time.Now())
