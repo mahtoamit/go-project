@@ -67,5 +67,11 @@ func rotateLogFile(logFilePath string) {
 		return
 	}
 
+	// Close the previous log file, if it exists
+	file, ok := Logger.Writer().(*os.File)
+	if ok {
+		_ = file.Close()
+	}
+
 	Logger.SetOutput(logFile) // Update the log file for rotation
 }
