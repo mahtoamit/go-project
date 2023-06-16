@@ -35,6 +35,7 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 	token, err := auth.GenerateToken(user.Email)
+	
 	if err != nil {
 		utils.Log("ERROR", "handler", constants.Url_login,"", "Login", "Error in token generation in Login:"+err.Error(),startTime, time.Now())
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

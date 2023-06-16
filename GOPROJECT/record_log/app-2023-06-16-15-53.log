@@ -1,0 +1,13 @@
+2023-06-16T15:53:08.812 INFO book /api/v1/book/ dequequedata  started ResponseTime:0s
+2023-06-16T15:53:08.813 INFO book /api/v1/book/ dequequedata  Data received ResponseTime:1.1933ms
+2023-06-16T15:53:08.824 ERROR book /api/v1/book/:title  Getbook Error unmarshaling cached books data:json: cannot unmarshal object into Go value of type []models.Book ResponseTime:
+2023-06-16T15:53:09.004 Error book /api/v1/book/ dequeuedata  empty slice found ResponseTime:
+2023-06-16T15:53:09.023 ERROR book /api/v1/book/:title  Getbook Error unmarshaling cached books data:json: cannot unmarshal object into Go value of type []models.Book ResponseTime:
+2023-06-16T15:53:09.067 Error book /api/v1/book/ dequeuedata  empty slice found ResponseTime:
+2023-06-16T15:53:09.075 ERROR book /api/v1/book/:title  Getbook Error unmarshaling cached books data:json: cannot unmarshal object into Go value of type []models.Book ResponseTime:
+2023-06-16T15:53:09.088 Error book /api/v1/book/ dequeuedata  empty slice found ResponseTime:
+2023-06-16T15:53:09.098 ERROR book /api/v1/book/:title  Getbook Error unmarshaling cached books data:json: cannot unmarshal object into Go value of type []models.Book ResponseTime:
+2023-06-16T15:53:09.107 Error book /api/v1/book/ dequeuedata  empty slice found ResponseTime:
+2023-06-16T15:53:09.122 ERROR book /api/v1/book/:title  Getbook Error unmarshaling cached books data:json: cannot unmarshal object into Go value of type []models.Book ResponseTime:
+2023-06-16T15:53:09.142 Error book /api/v1/book/ dequeuedata  empty slice found ResponseTime:
+2023-06-16T15:53:09.179 INFO book /api/v1/book/ dequequedata  ended ResponseTime:366.7893ms

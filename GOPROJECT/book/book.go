@@ -120,36 +120,39 @@ func Newbook(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": validationErr.Error()})
 
 	}
-	//to first store the data in the redis
-	key := "data"
-	data, err := queries.RedisSetNewCache(books, key, userId)
+	// //to first store the data in the redis
+	// key := "data"
+	// data, err := queries.RedisSetNewCache(books, key, userId)
 
-	if err != nil && !data {
-		utils.Log("DEBUG", "book", constants.Url_add_book, userId, "NewBook", "ended")
-		return c.Status(252).JSON(fiber.Map{"msg": err})
-	}
+	// if err != nil && !data {
+	// 	utils.Log("DEBUG", "book", constants.Url_add_book, userId, "NewBook", "ended")
+	// 	return c.Status(252).JSON(fiber.Map{"msg": err})
+	// }
 
-	// Invalidate the books cache in Redis
-	deletekey := "books"
-	delete := queries.RedisDeleteBook(deletekey, userId)
+	// // Invalidate the books cache in Redis
+	// deletekey := "books"
+	// delete := queries.RedisDeleteBook(deletekey, userId)
 
-	if !delete {
-		utils.Log("DEBUG", "book", constants.Url_add_book, userId, "NewBook", "ended")
-		return c.Status(253).JSON(fiber.Map{"msg": "cache not deleted"})
-	}
+	// if !delete {
+	// 	utils.Log("DEBUG", "book", constants.Url_add_book, userId, "NewBook", "ended")
+	// 	return c.Status(253).JSON(fiber.Map{"msg": "cache not deleted"})
+	// }
 
-	// Check if the data exists in the Redis cache
+	// // Check if the data exists in the Redis cache
 
-	book := queries.RedisNewCache(key, userId)
+	// book := queries.RedisNewCache(key, userId)
 
-	if book.Title != "" {
-		endTime := time.Now()
-		utils.Log("INFO", "book", constants.Url_add_book, userId, "Newbook", "ended", startTime, endTime)
-		//push the data to the channel to entry in the db
-		bookDataChannel <- book
-		return c.JSON(fiber.Map{"data": fiber.Map{"title": book.Title, "author": book.Author, "rating": book.Rating}})
+	// if book.Title != "" {
+	// 	endTime := time.Now()
+	// 	utils.Log("INFO", "book", constants.Url_add_book, userId, "Newbook", "ended", startTime, endTime)
+	// 	//push the data to the channel to entry in the db
+	// 	bookDataChannel <- book
+	// 	return c.JSON(fiber.Map{"data": fiber.Map{"title": book.Title, "author": book.Author, "rating": book.Rating}})
 
-	}
+	// }
+
+    // push the data to the channel to entry in the db
+    bookDataChannel <- *books
 
 	endTime := time.Now()
 	utils.Log("INFO", "book", constants.Url_add_book, userId, "Newbook", "ended", startTime, endTime)
@@ -238,14 +241,14 @@ func dequeueEmployeeData() {
 	utils.InitLogger()
 	startTime := time.Now()
 	utils.Log("INFO", "book", constants.Url_add_book, "dequequedata", "", "started", startTime, time.Now())
-
+   
 	for book := range bookDataChannel {
 		utils.Log("INFO", "book", constants.Url_add_book, "dequequedata", "", "Data received", startTime, time.Now())
 		// Calculate the response time
 		startTime := time.Now()
 
-		err := queries.DBCreate(book)
-		if err != nil {
+		result,err := queries.RedisSetNewCache(book,constants.Books_constant)
+		if err != nil && !result {
 			utils.Log("Error", "book", constants.Url_add_book, "dequeuedata", "", err.Error(), startTime, time.Now())
 		}
 

@@ -87,18 +87,19 @@ func RedisCacheGetBook(userId string,key string)(books[]models.Book ){
 }
 
 
-func RedisSetNewCache(books *models.Book,key string ,userId string)(flag1 bool,err error){
+func RedisSetNewCache(books models.Book,key string)(flag1 bool,err error){
 	// Store the data in the Redis cache for future use
 	data, err := json.Marshal(books)
+	print("data", data)
 	var redisClient = database.RedisClient
 	flag1 = false
 	if err != nil {
-		utils.Log("ERROR", "book", constants.Url_get_books,userId, "Getbooks", constants.Unmarshal_error + err.Error())
+		utils.Log("ERROR", "book", constants.Url_get_books ,"","Getbooks", constants.Unmarshal_error + err.Error())
 		return flag1 ,err
 	} else {
-		err := redisClient.Set(ctx, key , data, 1*time.Hour).Err()
+		err := redisClient.LPush(ctx,key , data, 1*time.Hour).Err()
 		if err != nil {
-			utils.Log("ERROR", "book", constants.Url_get_books, userId,"Getbooks", constants.Error_caching_data + err.Error())
+			utils.Log("ERROR", "book", constants.Url_get_books,"","Getbooks", constants.Error_caching_data + err.Error())
 			return flag1 ,err
 		}
 	}
@@ -145,4 +146,14 @@ func Deletebook(data string,userId string)(err error){
 		return err
 	}
 	return nil
+}
+
+
+func RetrieveData() ([]string, error){
+	var redisClient = database.RedisClient
+	// Retrieve the list values using LRANGE
+	cachedData, err := redisClient.LRange(ctx, constants.Books_constant, 0, -1).Result()
+
+    return cachedData , err
+
 }
