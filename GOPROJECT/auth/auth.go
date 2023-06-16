@@ -30,9 +30,9 @@ func GenerateToken(userId string) (string, error) {
 	return t, nil
 }
 
-func Protected() func(*fiber.Ctx) error {
+func Protected(c *fiber.Ctx)  error {
 	utils.InitLogger()
-	return func(c *fiber.Ctx) error {
+	
 		startTime := time.Now() // Declare and assign the start time
 
 		authorization := c.Get("Authorization")
@@ -67,5 +67,5 @@ func Protected() func(*fiber.Ctx) error {
 
 		return c.Next()
 	}
-}
+
 

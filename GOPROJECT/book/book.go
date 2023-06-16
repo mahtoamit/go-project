@@ -14,15 +14,7 @@ import (
 	"github.com/tutorialedge/go-fiber-tutorial/utils"
 )
 
-// const (
-// 	url_get_books = "/api/v1/books"
-// 	url_get_single_book = "/api/v1/book/:title"
-// 	url_add_book = "/api/v1/book/"
-// 	url_update_book ="/api/v1/book/:id"
-// 	unmarshal_error = "Error unmarshaling cached books data:"
-// 	Error_caching_data = "Error caching books data:"
-// 	Error_deleting_cached_data = "Error deleting employees cache: "
-// )
+
 
 var bookDataChannel chan models.Book
 
@@ -35,9 +27,10 @@ var startTime time.Time
 
 func Getbooks(c *fiber.Ctx) error {
 	utils.InitLogger()
+	startTime = time.Now()
 	userId := c.Locals("userId").(string)
-	startTime := time.Now() // Set the start time before processing the request
-	utils.Log("INFO", "book", constants.Url_get_books, userId, "Getbooks", "started", startTime, time.Now())
+	 // Set the start time before processing the request
+	utils.Log("INFO", "book", constants.Url_get_books, userId, "Getbooks", "started", time.Now(),time.Now())
 	// Check if the data exists in the Redis cache
 
 	key := "books"
