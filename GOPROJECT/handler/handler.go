@@ -25,6 +25,25 @@ func Login(c *fiber.Ctx) error {
 			"error": "Cannot parse JSON",
 		})
 	}
+
+	// validation for  email 
+	valid_email := models.ValidateEmail(request.Email)
+
+	if !valid_email {
+		utils.Log("ERROR", "handler",constants.Url_signup,"","Login", "Email is not valid", startTime, time.Now())
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Email is not valid "},)
+	}
+    // validation for password 
+	Valid_password := models.ValidatePassword(request.Password)
+
+	if !Valid_password {
+		utils.Log("ERROR", "handler",constants.Url_signup,"","Login", "password is not valid", startTime, time.Now())
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "password is not valid "},)
+	}
+
+
 	// In real world application, you should hash the password
 	user := queries.Login(request.Email,request.Password)
 	
@@ -58,6 +77,23 @@ func Signup(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Cannot parse JSON",
 		})
+	}
+
+	// validation for  email 
+	valid_email := models.ValidateEmail(request.Email)
+
+	if !valid_email {
+		utils.Log("ERROR", "handler",constants.Url_signup,"","Signup", "Email is not valid", startTime, time.Now())
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Email is not valid "},)
+	}
+    // validation for password 
+	Valid_password := models.ValidatePassword(request.Password)
+
+	if !Valid_password {
+		utils.Log("ERROR", "handler",constants.Url_signup,"","Signup", "password is not valid", startTime, time.Now())
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "password is not valid "},)
 	}
 
 	// In real world application, you should hash the password

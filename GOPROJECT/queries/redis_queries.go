@@ -149,11 +149,33 @@ func Deletebook(data string,userId string)(err error){
 }
 
 
-func RetrieveData() ([]string, error){
+func RetrieveData() (string, error){
 	var redisClient = database.RedisClient
 	// Retrieve the list values using LRANGE
-	cachedData, err := redisClient.LRange(ctx, constants.Books_constant, 0, -1).Result()
+	cachedData, err := redisClient.LPop(ctx, constants.Books_data).Result()
 
     return cachedData , err
 
+}
+
+func SetAuthenticationCache(key string,data string)( bool,error){
+	var redisClient = database.RedisClient
+	err := redisClient.Set(ctx, key , data, 1*time.Hour).Err()
+		if err != nil {
+			return false ,err
+		}
+		return true,err
+
+}
+
+func GetAuthenticationCache(key string)(string){
+	var redisClient = database.RedisClient
+	cachedData, err := redisClient.Get(ctx, key).Result()
+	if err != nil {
+		cachedData = ""
+		return  cachedData
+	}
+
+
+	return cachedData
 }
