@@ -1,0 +1,6 @@
+2023-06-16T13:10:08.804 INFO book /api/v1/book/ kalpesh@123gmail.com Newbook started ResponseTime:0s
+2023-06-16T13:10:08.806 INFO book /api/v1/book/ dequequedata  Data received ResponseTime:34.6213804s
+2023-06-16T13:10:08.805 INFO book /api/v1/book/ kalpesh@123gmail.com Newbook ended ResponseTime:1.0595ms
+2023-06-16T13:10:08.817 ERROR book /api/v1/books  Getbooks Error caching books data:WRONGTYPE Operation against a key holding the wrong kind of value ResponseTime:
+2023-06-16T13:10:08.824 Error book /api/v1/book/ dequeuedata  WRONGTYPE Operation against a key holding the wrong kind of value ResponseTime:10.6407ms
+2023-06-16T13:10:08.833 INFO book /api/v1/book/ dequequedata  ended ResponseTime:19.7649ms

@@ -1,0 +1,9 @@
+2023-06-16T14:04:27.172 INFO Main   main Graceful shutdown ResponseTime:2m34.8014113s
+2023-06-16T14:04:32.431 INFO Main   main Application starting ResponseTime:0s
+2023-06-16T14:04:32.431 INFO book /api/v1/book/ dequequedata  started ResponseTime:0s
+2023-06-16T14:04:35.355 INFO database redis  Connect Connection opened to the Redis server ResponseTime:1.0233ms
+2023-06-16T14:04:35.364 INFO Main   main Database initialized ResponseTime:2.93293s
+2023-06-16T14:04:43.654 INFO book /api/v1/book/ kalpesh@123gmail.com Newbook started ResponseTime:0s
+2023-06-16T14:04:43.662 INFO book /api/v1/book/ kalpesh@123gmail.com Newbook ended ResponseTime:8.48ms
+2023-06-16T14:04:43.662 INFO book /api/v1/book/ dequequedata  Data received ResponseTime:11.2309894s
+2023-06-16T14:04:43.676 INFO book /api/v1/book/ dequequedata  ended ResponseTime:0s

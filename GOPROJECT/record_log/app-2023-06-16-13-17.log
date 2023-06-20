@@ -1,0 +1,4 @@
+2023-06-16T13:17:20.016 INFO book /api/v1/book/ kalpesh@123gmail.com Newbook started ResponseTime:0s
+2023-06-16T13:17:20.017 INFO book /api/v1/book/ dequequedata  Data received ResponseTime:7m45.8328991s
+2023-06-16T13:17:20.017 INFO book /api/v1/book/ kalpesh@123gmail.com Newbook ended ResponseTime:1.5194ms
+2023-06-16T13:17:20.029 INFO book /api/v1/book/ dequequedata  ended ResponseTime:2.2991ms

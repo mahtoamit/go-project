@@ -3,12 +3,13 @@ package handler
 import (
 	"fmt"
 	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/tutorialedge/go-fiber-tutorial/auth"
-	"github.com/tutorialedge/go-fiber-tutorial/database"
+	"github.com/tutorialedge/go-fiber-tutorial/constants"
 	"github.com/tutorialedge/go-fiber-tutorial/models"
+	"github.com/tutorialedge/go-fiber-tutorial/queries"
 	"github.com/tutorialedge/go-fiber-tutorial/utils"
-	"github.com/tutorialedge/go-fiber-tutorial/configs"
 )
 
 
@@ -19,28 +20,58 @@ func Login(c *fiber.Ctx) error {
 	startTime := time.Now()
 
 	if err := c.BodyParser(request); err != nil {
-		utils.Log("ERROR", "handler", configs.Url_login,"","Login", "Error parsing JSON in Login:"+err.Error(),startTime, time.Now())
+		utils.Log("ERROR", "handler", constants.Url_login,"","Login", "Error parsing JSON in Login:"+err.Error(),startTime, time.Now())
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Cannot parse JSON",
 		})
 	}
+
+	// validation for  email 
+	valid_email := models.ValidateEmail(request.Email)
+
+	if !valid_email {
+		utils.Log("ERROR", "handler",constants.Url_signup,"","Login", "Email is not valid", startTime, time.Now())
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Email is not valid "},)
+	}
+    // validation for password 
+	Valid_password := models.ValidatePassword(request.Password)
+
+	if !Valid_password {
+		utils.Log("ERROR", "handler",constants.Url_signup,"","Login", "password is not valid", startTime, time.Now())
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "password is not valid "},)
+	}
+
+
 	// In real world application, you should hash the password
-	user := models.SignupRequest{}
-	database.Database.Where("email = ? AND password = ?", request.Email, request.Password).First(&user)
+	user := queries.Login(request.Email,request.Password)
+	
 	if user.Email == "" {
-		utils.Log("ERROR", "handler", configs.Url_login,"", "Login", "Invalid login credentials in Login",startTime, time.Now())
+		utils.Log("ERROR", "handler", constants.Url_login,"", "Login", "Invalid login credentials in Login",startTime, time.Now())
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Invalid login credentials",
 		})
 	}
-	token, err := auth.GenerateToken(user.Email)
-	if err != nil {
-		utils.Log("ERROR", "handler", configs.Url_login,"", "Login", "Error in token generation in Login:"+err.Error(),startTime, time.Now())
+	token:= auth.GenerateToken()
+
+	if token == ""{
+		utils.Log("ERROR", "handler", constants.Url_login,"", "Login", "Error in token generation in Login:",startTime, time.Now())
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Could not login",
 		})
 	}
-	utils.Log("INFO","handler",configs.Url_login,"","Login","Login Succesfully.",startTime, time.Now())
+
+	//push the token to redis
+	result,err := queries.SetAuthenticationCache(token,user.Email)
+	
+	if err != nil && !result {
+		utils.Log("ERROR", "handler", constants.Url_login,"", "Login", "Error in token generation in Login:"+err.Error(),startTime, time.Now())
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not login",
+		})
+	}
+	utils.Log("INFO","handler",constants.Url_login,"","Login","Login Succesfully.",startTime, time.Now())
 	return c.JSON(fiber.Map{
 		"token": token,
 	})
@@ -52,10 +83,27 @@ func Signup(c *fiber.Ctx) error {
 	startTime := time.Now()
 
 	if err := c.BodyParser(request); err != nil {
-		utils.Log("ERROR", "handler",configs.Url_signup,"","Signup", "Error parsing JSON in Signup:"+err.Error(), startTime, time.Now())
+		utils.Log("ERROR", "handler",constants.Url_signup,"","Signup", "Error parsing JSON in Signup:"+err.Error(), startTime, time.Now())
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Cannot parse JSON",
 		})
+	}
+
+	// validation for  email 
+	valid_email := models.ValidateEmail(request.Email)
+
+	if !valid_email {
+		utils.Log("ERROR", "handler",constants.Url_signup,"","Signup", "Email is not valid", startTime, time.Now())
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Email is not valid "},)
+	}
+    // validation for password 
+	Valid_password := models.ValidatePassword(request.Password)
+
+	if !Valid_password {
+		utils.Log("ERROR", "handler",constants.Url_signup,"","Signup", "password is not valid", startTime, time.Now())
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "password is not valid "},)
 	}
 
 	// In real world application, you should hash the password
@@ -66,15 +114,27 @@ func Signup(c *fiber.Ctx) error {
 		Location: request.Location,
 	}
 	fmt.Println("data", user)
-	database.Database.Create(&user)
-	utils.Log("INFO", "handler", configs.Url_signup,"", "Signup", "User created successfully in Signup", startTime, time.Now())
-	return c.JSON(user)
+	err := queries.CreateUser(user)
+	if err!= nil{
+		utils.Log("ERROR", "handler",constants.Url_signup,"","Signup", err.Error())
+		return c.Status(253).JSON(fiber.Map{"msg":"User Not created"})
+	}
+	utils.Log("INFO", "handler", constants.Url_signup,"", "Signup", "User created successfully in Signup", startTime, time.Now())
+	return c.Status(200).JSON(fiber.Map{"data":user})
 }
 
 func Logout(c *fiber.Ctx) error {
 	utils.InitLogger()
 	startTime := time.Now()
-	utils.Log("INFO", "handler", configs.Url_logout,"", "Logout", "Processing logout Request.", startTime, time.Now())
+	authorization := c.Get("Authorization")
+	result := queries.RedisDeleteAuthentication(authorization)
+	if !result {
+		utils.Log("ERROR", "handler", constants.Url_logout,"", "Logout", "Error while log out .", time.Now())
+	return c.JSON(fiber.Map{
+		"error": "Not able to log out.",
+	})
+	}
+	utils.Log("INFO", "handler", constants.Url_logout,"", "Logout", "Processing logout Request.", startTime, time.Now())
 	return c.JSON(fiber.Map{
 		"message": "Logout successful.",
 	})

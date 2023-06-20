@@ -1,0 +1,3 @@
+2023-06-16T13:39:22.886 INFO Main   main Graceful shutdown ResponseTime:29m48.7013674s
+2023-06-16T13:39:36.284 INFO book /api/v1/book/ dequequedata  started ResponseTime:0s
+2023-06-16T13:39:36.285 INFO book /api/v1/book/ dequequedata  Data received ResponseTime:1.5498ms
