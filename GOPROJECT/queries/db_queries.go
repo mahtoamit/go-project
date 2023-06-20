@@ -37,7 +37,7 @@ func DBGetUpdateBook(title string)(books *models.Book){
 
 func DBUpdateBook(title string,books *models.Book)(*models.Book){
 	db :=  database.DB.Db
-	db.Exec("UPDATE books SET title = ?,author = ?,deleted_at =?,rating = ? Where title = ?",books.Title,books.Author,time.Now().Format("2006-01-02T15:04:05.000"),books.Rating,title)
+	db.Exec("UPDATE books SET title = ?,author = ?,updated_at =?,rating = ? Where title = ?",books.Title,books.Author,time.Now().Format("2006-01-02T15:04:05.000"),books.Rating,title)
 	return books
 }
 
