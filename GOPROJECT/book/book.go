@@ -123,7 +123,7 @@ func Newbook(c *fiber.Ctx) error {
 	}
 	
 
-    // push the data to the channel to entry in the db
+    // push the data to the channel to entry in the redis
     bookDataChannel <- *books
 
 	endTime := time.Now()
@@ -147,7 +147,7 @@ func Deletebook(c *fiber.Ctx) error {
 	if books.Title == "" {
 		endTime := time.Now()
 		utils.Log("ERROR", "book", constants.Url_get_single_book, userId, "Deletebook", "ended", startTime, endTime)
-		return c.Status(253).JSON("No book found ")
+		return c.Status(253).JSON(fiber.Map{"msg":"No Book Found"})
 	}
 
 	queries.DBDeletetBook(title, books)
@@ -182,7 +182,7 @@ func UpdateBook(c *fiber.Ctx) error {
 	if books.ID == 0 {
 		endTime := time.Now()
 		utils.Log("ERROR", "book", constants.Url_get_single_book, userId, "UpdateBook", "ended", startTime, endTime)
-		return c.Status(253).JSON("No book found ")
+		return c.Status(253).JSON(fiber.Map{"msg":"No Book Found"})
 	}
 
 	if err := c.BodyParser(book); err != nil {

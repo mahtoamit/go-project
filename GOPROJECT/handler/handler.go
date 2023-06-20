@@ -53,9 +53,19 @@ func Login(c *fiber.Ctx) error {
 			"error": "Invalid login credentials",
 		})
 	}
-	token, err := auth.GenerateToken(user.Email)
+	token:= auth.GenerateToken()
+
+	if token == ""{
+		utils.Log("ERROR", "handler", constants.Url_login,"", "Login", "Error in token generation in Login:",startTime, time.Now())
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not login",
+		})
+	}
+
+	//push the token to redis
+	result,err := queries.SetAuthenticationCache(token,user.Email)
 	
-	if err != nil {
+	if err != nil && !result {
 		utils.Log("ERROR", "handler", constants.Url_login,"", "Login", "Error in token generation in Login:"+err.Error(),startTime, time.Now())
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Could not login",
@@ -116,6 +126,14 @@ func Signup(c *fiber.Ctx) error {
 func Logout(c *fiber.Ctx) error {
 	utils.InitLogger()
 	startTime := time.Now()
+	authorization := c.Get("Authorization")
+	result := queries.RedisDeleteAuthentication(authorization)
+	if !result {
+		utils.Log("ERROR", "handler", constants.Url_logout,"", "Logout", "Error while log out .", time.Now())
+	return c.JSON(fiber.Map{
+		"error": "Not able to log out.",
+	})
+	}
 	utils.Log("INFO", "handler", constants.Url_logout,"", "Logout", "Processing logout Request.", startTime, time.Now())
 	return c.JSON(fiber.Map{
 		"message": "Logout successful.",

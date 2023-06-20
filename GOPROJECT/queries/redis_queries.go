@@ -108,7 +108,7 @@ func RedisSetNewCache(books models.Book,key string)(flag1 bool,err error){
 
 }
 
-func RedisDeleteBook(key string , userId string)(flag bool){
+func RedisDeleteBook(key string )(flag bool){
 	var redisClient = database.RedisClient
 	flag = false
 	del := redisClient.Del(ctx, key ).Err()
@@ -141,7 +141,7 @@ func RedisNewCache(key string,userId string)(books models.Book ){
 func Deletebook(data string,userId string)(err error){
 	// Invalidate the employees cache in Redis
 	redisClient := database.RedisClient
-	err = redisClient.Del(ctx, "books",data).Err()
+	err = redisClient.Del(ctx, constants.Books_constant,data).Err()
 	if err != nil {
 		return err
 	}
@@ -178,4 +178,15 @@ func GetAuthenticationCache(key string)(string){
 
 
 	return cachedData
+}
+
+func RedisDeleteAuthentication(token string )(flag bool){
+	var redisClient = database.RedisClient
+	flag = false
+	del := redisClient.Del(ctx, token).Err()
+	if del!= nil {
+		return false  
+
+	}
+    return true
 }

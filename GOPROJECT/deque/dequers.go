@@ -43,6 +43,12 @@ func DequeueEmployeeData(c *fiber.Ctx) error {
 					utils.Log("Error", "book", constants.Url_add_book, "dequeuedata", "", err.Error())
 				}
 
+				result := queries.RedisDeleteBook(constants.Books_constant)
+				if !result {
+					utils.Log("Error", "book", constants.Url_add_book, "dequeuedata", "","error for updating the redis cache")
+					return c.Status(252).JSON(fiber.Map{"error":"Not able to update the Cache"})
+				}
+
 			}else{
 				return c.Status(253).JSON(fiber.Map{"error":"The Data consist no values"})
 			}
