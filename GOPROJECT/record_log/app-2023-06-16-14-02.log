@@ -1,6 +1,0 @@
-2023-06-16T14:02:21.621 INFO book /api/v1/book/ kalpesh@123gmail.com Newbook started ResponseTime:0s
-2023-06-16T14:02:21.622 INFO book /api/v1/book/ dequequedata  Data received ResponseTime:29.2523692s
-2023-06-16T14:02:21.622 INFO book /api/v1/book/ kalpesh@123gmail.com Newbook ended ResponseTime:1.7864ms
-2023-06-16T14:02:21.632 ERROR book /api/v1/books  Getbooks Error caching books data:redis: can't marshal models.Book (implement encoding.BinaryMarshaler) ResponseTime:
-2023-06-16T14:02:21.642 Error book /api/v1/book/ dequeuedata  redis: can't marshal models.Book (implement encoding.BinaryMarshaler) ResponseTime:10.1933ms
-2023-06-16T14:02:21.654 INFO book /api/v1/book/ dequequedata  ended ResponseTime:22.0918ms

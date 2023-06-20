@@ -1,4 +1,0 @@
-2023-06-16T12:36:08.755 INFO book /api/v1/book/ dequequedata  started ResponseTime:0s
-2023-06-16T12:36:08.755 INFO Main   main Application starting ResponseTime:0s
-2023-06-16T12:36:11.728 INFO database redis  Connect Connection opened to the Redis server ResponseTime:1.0347ms
-2023-06-16T12:36:11.729 INFO Main   main Database initialized ResponseTime:2.9738335s
