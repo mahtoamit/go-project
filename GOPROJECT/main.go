@@ -36,6 +36,7 @@ func main() {
 	utils.Log("INFO", "Main", "","", "main", "Database initialized",startTime, time.Now())
 
 	routers.SetupRoutes(app)
+	
 
     // Set up a channel to capture interrupt signals
 	c := make(chan os.Signal, 1)

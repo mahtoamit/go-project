@@ -1,0 +1,5 @@
+2023-06-28T13:32:12.720 INFO book /api/v1/book/ dnynaesh@gmail.com Newbook started ResponseTime:0s
+2023-06-28T13:32:12.723 INFO book /api/v1/book/ dnynaesh@gmail.com Newbook ended ResponseTime:2.9957ms
+2023-06-28T13:32:12.723 INFO book /api/v1/book/ dequequedata  Data received ResponseTime:18.6583842s
+2023-06-28T13:32:12.739 INFO book /api/v1/book/ dequequedata  ended ResponseTime:1.855ms
+2023-06-28T13:32:27.175 INFO Main   main Graceful shutdown ResponseTime:33.11101s

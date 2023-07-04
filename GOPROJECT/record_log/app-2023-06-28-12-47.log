@@ -1,0 +1,4 @@
+2023-06-28T12:47:09.460 INFO book /api/v1/book/ dequequedata  started ResponseTime:0s
+2023-06-28T12:47:09.462 INFO book /api/v1/book/ dequequedata  Data received ResponseTime:1.5965ms
+2023-06-28T12:47:26.778 INFO book /api/v1/book/ dequequedata  started ResponseTime:0s
+2023-06-28T12:47:26.780 INFO book /api/v1/book/ dequequedata  Data received ResponseTime:1.728ms

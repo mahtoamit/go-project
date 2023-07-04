@@ -122,7 +122,6 @@ func Newbook(c *fiber.Ctx) error {
 
 	}
 	
-
     // push the data to the channel to entry in the redis
     bookDataChannel <- *books
 

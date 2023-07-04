@@ -190,3 +190,15 @@ func RedisDeleteAuthentication(token string )(flag bool){
 	}
     return true
 }
+
+func GetCount()(int){
+	var redisClient = database.RedisClient
+	cachedData ,err := redisClient.LLen(ctx, constants.Books_data).Result()
+	if err != nil {
+		cachedData = 0
+		return  int(cachedData)
+	}
+
+
+	return int(cachedData)
+}

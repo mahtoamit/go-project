@@ -1,0 +1,2 @@
+2023-06-28T14:46:00.016 INFO database redis  Connect Connection opened to the Redis server ResponseTime:4.4376ms
+2023-06-28T14:46:00.018 INFO Main   main Database initialized ResponseTime:3.1213091s

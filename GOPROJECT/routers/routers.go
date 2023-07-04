@@ -7,7 +7,7 @@ import (
 	"github.com/tutorialedge/go-fiber-tutorial/auth"
 	"github.com/tutorialedge/go-fiber-tutorial/constants"
 	"github.com/tutorialedge/go-fiber-tutorial/book"
-	"github.com/tutorialedge/go-fiber-tutorial/deque"
+	// "github.com/tutorialedge/go-fiber-tutorial/deque"
 	
 
 )
@@ -25,5 +25,5 @@ func SetupRoutes(app *fiber.App) {
 	app.Post("/api/v1/book/", auth.Protected, book.Newbook)
 	app.Put(constants.Url_book, auth.Protected, book.UpdateBook)
 	app.Delete(constants.Url_book, auth.Protected, book.Deletebook)
-	app.Get("/redis",deque.DequeueEmployeeData, health.Connect)
+// 	app.Get("/redis",deque.DequeueEmployeeData, health.Connect)
 }
