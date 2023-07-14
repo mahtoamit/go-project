@@ -1,18 +1,17 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"regexp"
 	"strings"
+
+	"gorm.io/gorm"
 )
-
-
 
 type Book struct {
 	gorm.Model
-	Title    string `json:"title" validate:"required"`
-	Author   string `json:"author" validate:"required"`
-	Rating   int    `json:"rating" validate:"required"`
+	Title     string `json:"title" validate:"required"`
+	Author    string `json:"author" validate:"required"`
+	Rating    int    `json:"rating" validate:"required"`
 	OtherInfo string `json:"otherinfo" validate:"required"`
 }
 
@@ -21,22 +20,19 @@ type LoginRequest struct {
 	Password string `json:"password" validate:"required" `
 }
 
-
 type SignupRequest struct {
-	gorm.Model    
+	gorm.Model
 	Name     string `json:"name" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
 	Location string `json:"location" validate:"required"`
 }
 
-
 // Custom validation tag for email
 func ValidateEmail(email string) bool {
 	regex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 	return regex.MatchString(email)
 }
-
 
 // Custom validation tag for password
 func ValidatePassword(password string) bool {
@@ -63,4 +59,10 @@ func ValidatePassword(password string) bool {
 	}
 
 	return hasSpecialChar && hasNumber && hasUpper && hasLower
+}
+
+type CacheModel struct {
+	DatabaseName string `validate:"required"`
+	QueryType    string `validate:"required"`
+	Model        Book
 }

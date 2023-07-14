@@ -14,8 +14,6 @@ import (
 	"github.com/tutorialedge/go-fiber-tutorial/utils"
 )
 
-
-
 var bookDataChannel chan models.Book
 
 func init() {
@@ -29,8 +27,8 @@ func Getbooks(c *fiber.Ctx) error {
 	utils.InitLogger()
 	startTime = time.Now()
 	userId := c.Locals("userId").(string)
-	 // Set the start time before processing the request
-	utils.Log("INFO", "book", constants.Url_get_books, userId, "Getbooks", "started", time.Now(),time.Now())
+	// Set the start time before processing the request
+	utils.Log("INFO", "book", constants.Url_get_books, userId, "Getbooks", "started", time.Now(), time.Now())
 	// Check if the data exists in the Redis cache
 
 	key := "books"
@@ -121,9 +119,10 @@ func Newbook(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": validationErr.Error()})
 
 	}
-	
-    // push the data to the channel to entry in the redis
-    bookDataChannel <- *books
+
+	// push the data to the channel to entry in the redis
+
+	bookDataChannel <- *books
 
 	endTime := time.Now()
 	utils.Log("INFO", "book", constants.Url_add_book, userId, "Newbook", "ended", startTime, endTime)
@@ -146,7 +145,7 @@ func Deletebook(c *fiber.Ctx) error {
 	if books.Title == "" {
 		endTime := time.Now()
 		utils.Log("ERROR", "book", constants.Url_get_single_book, userId, "Deletebook", "ended", startTime, endTime)
-		return c.Status(253).JSON(fiber.Map{"msg":"No Book Found"})
+		return c.Status(253).JSON(fiber.Map{"msg": "No Book Found"})
 	}
 
 	queries.DBDeletetBook(title, books)
@@ -181,7 +180,7 @@ func UpdateBook(c *fiber.Ctx) error {
 	if books.ID == 0 {
 		endTime := time.Now()
 		utils.Log("ERROR", "book", constants.Url_get_single_book, userId, "UpdateBook", "ended", startTime, endTime)
-		return c.Status(253).JSON(fiber.Map{"msg":"No Book Found"})
+		return c.Status(253).JSON(fiber.Map{"msg": "No Book Found"})
 	}
 
 	if err := c.BodyParser(book); err != nil {
@@ -212,13 +211,15 @@ func dequeueEmployeeData() {
 	utils.InitLogger()
 	startTime := time.Now()
 	utils.Log("INFO", "book", constants.Url_add_book, "dequequedata", "", "started", startTime, time.Now())
-   
+
 	for book := range bookDataChannel {
 		utils.Log("INFO", "book", constants.Url_add_book, "dequequedata", "", "Data received", startTime, time.Now())
 		// Calculate the response time
 		startTime := time.Now()
+		fmt.Println("value of book in for loop ", book)
+		fmt.Printf("type of book %T", book)
 
-		result,err := queries.RedisSetNewCache(book,constants.Books_data)
+		result, err := queries.RedisSetNewCache(book, constants.Books_data)
 		if err != nil && !result {
 			utils.Log("Error", "book", constants.Url_add_book, "dequeuedata", "", err.Error(), startTime, time.Now())
 		}
